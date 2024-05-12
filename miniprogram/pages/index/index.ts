@@ -5,10 +5,8 @@ const defaultAvatarUrl = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia0
 
 Component({
   data: {
-    motto: 'Hello World',
     userInfo: {
       avatarUrl: defaultAvatarUrl,
-      nickName: '',
     },
     hasUserInfo: false,
     canIUseGetUserProfile: wx.canIUse('getUserProfile'),
@@ -23,10 +21,9 @@ Component({
     },
     onChooseAvatar(e: any) {
       const { avatarUrl } = e.detail
-      const { nickName } = this.data.userInfo
       this.setData({
         "userInfo.avatarUrl": avatarUrl,
-        hasUserInfo: nickName && avatarUrl && avatarUrl !== defaultAvatarUrl,
+        hasUserInfo: avatarUrl && avatarUrl !== defaultAvatarUrl,
       })
     },
     onInputChange(e: any) {
