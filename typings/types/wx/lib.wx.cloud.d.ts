@@ -20,10 +20,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ***************************************************************************** */
 
-/**
- * Common interfaces and types
- */
-
 interface IAPIError {
     errMsg: string
 }
@@ -135,8 +131,6 @@ interface WxCloud {
     connectContainer(
         param: RQ<ICloud.ConnectContainerParam>
     ): Promise<ICloud.ConnectContainerResult>
-
-    services: ICloud.CloudServices
 }
 
 declare namespace ICloud {
@@ -201,37 +195,6 @@ declare namespace ICloud {
             service: string
             path?: string
         }
-    // === end ===
-
-    // === API: services ===
-    type AsyncSession<T> = T | PromiseLike<T>
-    interface GatewayCallOptions {
-        path: string
-        data: any
-        shouldSerialize?: boolean
-        apiVersion?: number
-    }
-    interface GatewayInstance {
-        call: (
-            param: CallContainerParam & GatewayCallOptions
-        ) => Promise<CallContainerResult>
-        refresh: (session: AsyncSession<string>) => Promise<void>
-    }
-    interface GatewayConstructOptions {
-        id: string
-        appid?: string
-        domain?: string
-        keepalive?: boolean
-        prefetch?: boolean
-        prefetchOptions?: {
-            concurrent?: number
-            enableQuic?: boolean
-            enableHttp2?: boolean
-        }
-    }
-    interface CloudServices {
-        Gateway: (opts: GatewayConstructOptions) => GatewayInstance
-    }
     // === end ===
 
     // === API: uploadFile ===

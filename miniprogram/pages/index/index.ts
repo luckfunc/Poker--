@@ -1,50 +1,130 @@
-// index.ts
-// 获取应用实例
-const app = getApp<IAppOption>()
-const defaultAvatarUrl = 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'
+// pages/index/index.ts
+import { post, upload } from "../../utils/http"
+import Toast from '@vant/weapp/toast/toast';
 
-Component({
+Page({
+  /**
+   * 页面的初始数据
+   */
   data: {
-    userInfo: {
-      avatarUrl: defaultAvatarUrl,
-    },
-    hasUserInfo: false,
-    canIUseGetUserProfile: wx.canIUse('getUserProfile'),
-    canIUseNicknameComp: wx.canIUse('input.type.nickname'),
+    headUrl: '',
+    userName: '',
+    usagesRoom: undefined
   },
-  methods: {
-    // 事件处理函数
-    bindViewTap() {
-      wx.navigateTo({
-        url: '../logs/logs',
+
+  /**
+   * 生命周期函数--监听页面加载
+   */
+  onLoad(param: any) {
+    if (param.roomId || param.scene) {
+      var roomId = param.roomId ? param.roomId : param.scene;
+      post("joinRoom", { roomId: roomId }).then((roomRes: any) => {
+        wx.navigateTo({
+          url: '/pages/room/room?roomId=' + roomRes.id
+        })
       })
-    },
-    onChooseAvatar(e: any) {
-      const { avatarUrl } = e.detail
+    }
+  },
+
+  /**
+   * 生命周期函数--监听页面初次渲染完成
+   */
+  onReady() {
+
+  },
+
+  /**
+   * 生命周期函数--监听页面显示
+   */
+  onShow() {
+    post("getUserInfo").then((res: any) => {
+      post("getRoomInfo").then((roomInfo: any) => {
+        this.setData({
+          headUrl: res.userAvatar,
+          userName: res.userName,
+          usagesRoom: roomInfo
+        })
+      });
+    });
+  },
+
+  /**
+   * 生命周期函数--监听页面隐藏
+   */
+  onHide() {
+
+  },
+
+  /**
+   * 生命周期函数--监听页面卸载
+   */
+  onUnload() {
+
+  },
+
+  /**
+   * 页面相关事件处理函数--监听用户下拉动作
+   */
+  onPullDownRefresh() {
+
+  },
+
+  /**
+   * 页面上拉触底事件的处理函数
+   */
+  onReachBottom() {
+
+  },
+
+  /**
+   * 用户点击右上角分享
+   */
+  onShareAppMessage() {
+    return {
+      title: '一个不错的打牌记账程序～',
+      path: '/pages/index/index',
+      imageUrl: 'https://kodo.xtyu.top/bookkeeping/static/share.png',
+    }
+  },
+  handleUserAvatar(e: { detail: { avatarUrl: string } }) {
+    const { avatarUrl } = e.detail;
+    upload('setUserAvatar', avatarUrl, 'userAvatar').then(() => {
       this.setData({
-        "userInfo.avatarUrl": avatarUrl,
-        hasUserInfo: avatarUrl && avatarUrl !== defaultAvatarUrl,
+        headUrl: e.detail.avatarUrl
       })
-    },
-    onInputChange(e: any) {
-      const nickName = e.detail.value
-      const { avatarUrl } = this.data.userInfo
-      this.setData({
-        "userInfo.nickName": nickName,
-        hasUserInfo: nickName && avatarUrl && avatarUrl !== defaultAvatarUrl,
-      })
-    },
-    getUserProfile() {
-      // 推荐使用wx.getUserProfile获取用户信息，开发者每次通过该接口获取用户个人信息均需用户确认，开发者妥善保管用户快速填写的头像昵称，避免重复弹窗
-      wx.getUserProfile({
-        desc: '展示用户信息', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
-        success: (res) => {
-          this.setData({
-            userInfo: res.userInfo,
-            hasUserInfo: true
+    })
+  },
+
+  handleUserName(e: Object) {
+    post('setUserName', { userName: e.detail.value }, true);
+    this.setData({
+      userName: e.detail.value
+    })
+  },
+
+  handleCreateRoom() {
+    if (this.data.userName) {
+      var room: any = this.data.usagesRoom;
+      console.log('room ID', room.id);
+      if (room) {
+        wx.navigateTo({
+          url: '/pages/room/room?roomId=' + room.id
+        })
+      } else {
+        post("buildRoom", {}, true).then((res: any) => {
+          wx.navigateTo({
+            url: '/pages/room/room?roomId=' + res.id
           })
-        }
-      })
-    },
+        });
+      }
+    } else {
+      Toast('请填写用户名后再创建房间');
+    }
   },
+
+  toHistory() {
+    wx.navigateTo({
+      url: '/pages/history/history'
+    })
+  }
 })
